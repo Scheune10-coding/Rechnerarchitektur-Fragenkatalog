@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rechnernetze – Prüfungssimulation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bg: "#020617",
+            bgSoft: "#020617",
+            panel: "#020617",
+            accent: "#22d3ee",
+            accentSoft: "#0f172a",
+          },
+          boxShadow: {
+            glass: "0 18px 45px rgba(15,23,42,0.9)",
+          },
+          borderRadius: {
+            xl2: "1.5rem",
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 text-slate-50 flex items-center justify-center p-4">
+
+  <div class="w-full max-w-6xl rounded-3xl border border-slate-800/80 bg-slate-950/90 shadow-glass backdrop-blur-xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
+
+    <!-- Header -->
+    <header class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-2">
+      <div>
+        <p class="text-[0.7rem] uppercase tracking-[0.24em] text-cyan-300 mb-1">Prüfungssimulation</p>
+        <h1 class="text-lg sm:text-xl font-semibold text-slate-50">
+          Rechnernetze – Kartenprüfung
+        </h1>
+        <p class="mt-1 text-xs sm:text-sm text-slate-300" id="examMeta">
+          –
+        </p>
+      </div>
+      <div class="flex flex-col items-end gap-2 text-xs">
+        <button
+          type="button"
+          onclick="window.history.back()"
+          class="hidden sm:inline-flex items-center gap-1 rounded-full border border-slate-700 px-3 py-1 text-[0.7rem] text-slate-200 hover:bg-slate-800/80"
+        >
+          ✕ Gehe zurück
+        </button>
+        <div class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 border border-slate-700 w-full sm:w-auto">
+          <span class="text-[0.7rem] text-slate-300">Fortschritt</span>
+          <span class="h-3 w-full sm:w-40 overflow-hidden rounded-full bg-slate-800">
+            <span id="progressBar" class="block h-3 w-0 rounded-full bg-emerald-400 transition-all"></span>
+          </span>
+          <span id="progressLabel" class="text-[0.7rem] text-slate-100">0%</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid gap-4 md:grid-cols-[minmax(0,2.1fr)_minmax(0,1.3fr)] mt-2">
+
+      <!-- Karteikarte -->
+      <section class="flex flex-col gap-6 mx-auto w-full max-w-3xl items-center text-center h-full justify-center">
+
+        <div
+          id="card"
+          class="relative flex min-h-[380px] items-center justify-center rounded-3xl 
+                 border border-slate-700 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 
+                 px-8 py-10 shadow-xl w-full"
+        >
+          <div class="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-tr from-cyan-500/8 via-transparent to-emerald-500/8"></div>
+
+          <div class="relative z-10 w-full max-w-2xl text-center">
+            <p id="cardLabel" class="mb-2 text-sm font-semibold uppercase tracking-[0.22em] text-cyan-300">
+              Frage
+            </p>
+            <p id="cardMeta" class="mb-5 text-xs text-slate-400">
+              –
+            </p>
+            <h2 id="cardQuestion"
+                class="whitespace-pre-line text-xl sm:text-2xl font-semibold text-slate-50 leading-relaxed">
+              –
+            </h2>
+            <p
+              id="cardAnswer"
+              class="mt-6 whitespace-pre-line text-lg sm:text-xl text-slate-100 opacity-0 transition-opacity duration-150 leading-relaxed"
+            ></p>
+            <p class="mt-4 text-xs text-slate-400">
+              <button id="toggleAnswerBtn" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1 text-[0.7rem] text-slate-100 hover:bg-slate-800">
+                Antwort anzeigen
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <!-- Buttons Richtig/Falsch -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm w-full">
+          <div class="flex flex-row w-full gap-3">
+            <button
+              id="correctBtn"
+              class="inline-flex items-center gap-2 rounded-full border border-emerald-500/70 bg-emerald-500/20 px-4 py-2 font-medium text-emerald-200 hover:bg-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed w-1/2 justify-center text-center"
+            >
+              ✅ Richtig
+            </button>
+            <button
+              id="wrongBtn"
+              class="inline-flex items-center gap-2 rounded-full border border-rose-500/70 bg-rose-500/15 px-4 py-2 font-medium text-rose-200 hover:bg-rose-500/25 disabled:opacity-40 disabled:cursor-not-allowed w-1/2 justify-center text-center"
+            >
+              ❌ Falsch
+            </button>
+          </div>
+          <div class="text-[0.75rem] text-slate-300 space-y-0.5 text-center sm:text-right w-full">
+            <p class="w-full sm:w-auto text-center sm:text-right"><span id="remainingLabel" class="font-semibold text-slate-50">0</span> Karten in der Queue</p>
+            <p class="w-full sm:w-auto text-center sm:text-right"><span id="answeredLabel" class="font-semibold text-slate-50">0</span> beantwortet (inkl. Wiederholungen)</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats / Ergebnis -->
+      <aside class="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-950/95 px-4 py-4 text-sm">
+        <h2 class="text-xs font-semibold uppercase tracking-[0.2em] text-slate-300 mb-1">
+          Übersicht
+        </h2>
+
+        <div class="rounded-xl border border-slate-800 bg-slate-900/90 p-3 text-[0.8rem] text-slate-200 space-y-1.5">
+          <div class="flex justify-between">
+            <span>Gesamt Karten im Test</span>
+            <span id="totalLabel" class="font-semibold text-slate-50">0</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Bereits mindestens einmal richtig</span>
+            <span id="masteredLabel" class="font-semibold text-emerald-300">0</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Richtig insgesamt</span>
+            <span id="correctCountLabel" class="font-semibold text-emerald-300">0</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Falsch insgesamt</span>
+            <span id="wrongCountLabel" class="font-semibold text-rose-300">0</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onclick="window.location.href='index.html'"
+          class="mt-1 inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-100 hover:bg-slate-800"
+        >
+          Zurück zum Menü
+        </button>
+
+        <div id="finishedBox" class="hidden mt-3 rounded-xl border border-emerald-500/60 bg-emerald-500/10 p-3 text-[0.8rem] text-emerald-100">
+          ✅ Prüfung bestanden. Alle Karten wurden mindestens einmal richtig beantwortet.
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Fragen-Katalog -->
+  <script src="questions.js"></script>
+
+  <script>
+    const catalog = (window.CATALOG && window.CATALOG.categories) ? window.CATALOG : { categories: [] };
+
+    // flache Liste
+    const allQuestions = [];
+    catalog.categories.forEach(cat => {
+      (cat.topics || []).forEach(topic => {
+        (topic.questions || []).forEach(q => {
+          allQuestions.push({
+            id: q.id,
+            question: q.question,
+            answer: q.answer,
+            categoryId: cat.id,
+            categoryTitle: cat.title,
+            topicId: topic.id,
+            topicTitle: topic.title
+          });
+        });
+      });
+    });
+
+    // URL-Parameter lesen
+    const params = new URLSearchParams(window.location.search);
+    const paramCategory = params.get("category") || "all";
+    const paramTopic = params.get("topic") || "all";
+    const paramSearch = (params.get("search") || "").toLowerCase();
+
+    function filterForExam() {
+      let result = allQuestions.slice();
+
+      if (paramCategory !== "all") {
+        result = result.filter(q => q.categoryId === paramCategory);
+      }
+      if (paramTopic !== "all") {
+        result = result.filter(q => q.topicId === paramTopic);
+      }
+      if (paramSearch) {
+        result = result.filter(q =>
+          (q.question || "").toLowerCase().includes(paramSearch) ||
+          (q.answer || "").toLowerCase().includes(paramSearch)
+        );
+      }
+      return result;
+    }
+
+    const examCards = filterForExam().map(q => ({
+      ...q,
+      mastered: false
+    }));
+
+    // Queue
+    let queue = examCards.slice();
+    let current = queue[0] || null;
+
+    // Stats
+    let totalAnswered = 0;
+    let totalCorrect = 0;
+    let totalWrong = 0;
+
+    // DOM
+    const examMeta = document.getElementById("examMeta");
+    const progressBar = document.getElementById("progressBar");
+    const progressLabel = document.getElementById("progressLabel");
+
+    const cardLabel = document.getElementById("cardLabel");
+    const cardMeta = document.getElementById("cardMeta");
+    const cardQuestion = document.getElementById("cardQuestion");
+    const cardAnswer = document.getElementById("cardAnswer");
+
+    const toggleAnswerBtn = document.getElementById("toggleAnswerBtn");
+    const correctBtn = document.getElementById("correctBtn");
+    const wrongBtn = document.getElementById("wrongBtn");
+
+    const remainingLabel = document.getElementById("remainingLabel");
+    const answeredLabel = document.getElementById("answeredLabel");
+    const totalLabel = document.getElementById("totalLabel");
+    const masteredLabel = document.getElementById("masteredLabel");
+    const correctCountLabel = document.getElementById("correctCountLabel");
+    const wrongCountLabel = document.getElementById("wrongCountLabel");
+    const finishedBox = document.getElementById("finishedBox");
+
+    let answerShown = false;
+
+    function updateMetaText() {
+      const parts = [];
+      if (paramCategory !== "all") {
+        const cat = catalog.categories.find(c => c.id === paramCategory);
+        if (cat) parts.push(cat.title || cat.id);
+      }
+      if (paramTopic !== "all") {
+        const cat = catalog.categories.find(c => c.id === paramCategory);
+        const topic = cat ? (cat.topics || []).find(t => t.id === paramTopic) : null;
+        if (topic) parts.push(topic.title || topic.id);
+      }
+      if (paramSearch) {
+        parts.push(`Suche: "${paramSearch}"`);
+      }
+      if (parts.length === 0) {
+        examMeta.textContent = "Alle Fragen aus dem Katalog werden abgefragt.";
+      } else {
+        examMeta.textContent = parts.join(" · ");
+      }
+    }
+
+    function updateStats() {
+      const total = examCards.length;
+      const mastered = examCards.filter(c => c.mastered).length;
+      const remaining = queue.length;
+
+      totalLabel.textContent = total;
+      masteredLabel.textContent = mastered;
+      remainingLabel.textContent = remaining;
+      answeredLabel.textContent = totalAnswered;
+      correctCountLabel.textContent = totalCorrect;
+      wrongCountLabel.textContent = totalWrong;
+
+      const progress = total === 0 ? 0 : Math.round((mastered / total) * 100);
+      progressBar.style.width = progress + "%";
+      progressLabel.textContent = progress + "%";
+    }
+
+    function setButtonsEnabled(enabled) {
+      correctBtn.disabled = !enabled;
+      wrongBtn.disabled = !enabled;
+    }
+
+    function renderCard() {
+      if (examCards.length === 0) {
+        cardLabel.textContent = "Keine Fragen";
+        cardMeta.textContent = "";
+        cardQuestion.textContent = "Es wurden keine Fragen für diese Prüfung gefunden.";
+        cardAnswer.textContent = "";
+        cardAnswer.style.opacity = 0;
+        toggleAnswerBtn.disabled = true;
+        setButtonsEnabled(false);
+        return;
+      }
+
+      if (!current) {
+        cardLabel.textContent = "Fertig";
+        cardMeta.textContent = "";
+        cardQuestion.textContent = "Prüfung bestanden – alle Karten wurden mindestens einmal richtig beantwortet.";
+        cardAnswer.textContent = "";
+        cardAnswer.style.opacity = 0;
+        toggleAnswerBtn.disabled = true;
+        setButtonsEnabled(false);
+        finishedBox.classList.remove("hidden");
+        return;
+      }
+
+      toggleAnswerBtn.disabled = false;
+      setButtonsEnabled(true);
+
+      cardLabel.textContent = answerShown ? "Antwort" : "Frage";
+      cardQuestion.textContent = current.question || "";
+      cardAnswer.textContent = current.answer || "";
+      cardAnswer.style.opacity = answerShown ? 1 : 0;
+
+      cardMeta.textContent = (current.categoryTitle || current.categoryId || "?") +
+        " · " + (current.topicTitle || current.topicId || "?");
+    }
+
+    function nextFromQueue() {
+      if (queue.length === 0) {
+        current = null;
+      } else {
+        current = queue[0];
+      }
+      answerShown = false;
+      cardAnswer.style.opacity = 0;
+      cardLabel.textContent = "Frage";
+      toggleAnswerBtn.textContent = "Antwort anzeigen";
+      renderCard();
+      updateStats();
+    }
+
+    // Buttons
+    toggleAnswerBtn.addEventListener("click", () => {
+      if (!current) return;
+      answerShown = !answerShown;
+      cardAnswer.style.opacity = answerShown ? 1 : 0;
+      cardLabel.textContent = answerShown ? "Antwort" : "Frage";
+      toggleAnswerBtn.textContent = answerShown ? "Antwort ausblenden" : "Antwort anzeigen";
+    });
+
+    correctBtn.addEventListener("click", () => {
+      if (!current) return;
+      totalAnswered++;
+      totalCorrect++;
+
+      current.mastered = true;
+
+      queue.shift();
+      nextFromQueue();
+    });
+
+    wrongBtn.addEventListener("click", () => {
+      if (!current) return;
+      totalAnswered++;
+      totalWrong++;
+
+      queue.push(current);
+      queue.shift();
+      nextFromQueue();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+      // Space: Antwort ein-/ausblenden
+      if (e.code === "Space") {
+        e.preventDefault();
+        toggleAnswerBtn.click();
+      }
+
+      // 1: richtig
+      if (e.key === "1") {
+        e.preventDefault();
+        correctBtn.click();
+      }
+
+      // 2: falsch
+      if (e.key === "2") {
+        e.preventDefault();
+        wrongBtn.click();
+      }
+
+      // Pfeiltaste rechts: richtig
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        correctBtn.click();
+      }
+
+      // Pfeiltaste links: falsch
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        wrongBtn.click();
+      }
+    });
+
+    // Init
+    updateMetaText();
+    updateStats();
+    renderCard();
+  </script>
+</body>
+</html>

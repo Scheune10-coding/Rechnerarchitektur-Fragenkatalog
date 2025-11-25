@@ -9,7 +9,6 @@ Dieses Projekt ist ein interaktiver Fragenkatalog für das Fach Rechnernetze, op
 - **Prüfungssimulation**: Starte eine Simulation mit den aktuell gefilterten Fragen. Falsche Antworten kommen erneut in die Queue.
 - **Statistiken**: Zeigt Gesamtanzahl und gefilterte Anzahl der Fragen.
 - **Tastatur-Shortcuts**: Navigation und Antwortanzeige per Tastatur (Desktop).
-- **Wischgesten**: Auf mobilen Geräten kann per Swipe zwischen Karten gewechselt und in der Prüfung bewertet werden.
 - **Animationen**: Kartenwechsel ist animiert für ein modernes Nutzererlebnis.
 
 ## Installation & Nutzung

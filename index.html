@@ -425,7 +425,7 @@
         " · " + (current.topicTitle || current.topicId || "?");
     }
 
-        function renderListView(filtered) {
+    function renderListView(filtered) {
       const total = allQuestions.length;
       const count = filtered.length;
 
@@ -465,7 +465,7 @@
               ${item.question}
             </span>
           </span>
-          <span class="ml-3 text-slate-400 text-sm">▼</span>
+          <span class="ml-3 text-slate-400 text-sm toggle-icon">▼</span>
         `;
 
         const answer = document.createElement("div");
@@ -476,6 +476,11 @@
         header.addEventListener("click", () => {
           const isHidden = answer.classList.contains("hidden");
           answer.classList.toggle("hidden", !isHidden);
+
+          const icon = header.querySelector(".toggle-icon");
+          if (icon) {
+            icon.textContent = isHidden ? "▲" : "▼";
+          }
         });
 
         li.appendChild(header);
@@ -483,6 +488,7 @@
         listContainer.appendChild(li);
       });
     }
+
 
 
     function render() {

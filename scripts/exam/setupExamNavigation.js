@@ -202,13 +202,6 @@ export function setupExamNavigation({ catalog, allQuestions }) {
   // Animation und Wischgesten für Karte
   setupCardEvents({ card, prevBtn: wrongBtn, nextBtn: correctBtn });
 
-  function animateAndRender(direction, after) {
-    animateCardTransition(card, direction);
-    setTimeout(() => {
-      if (typeof after === 'function') after();
-    }, 250);
-  }
-
   // Init
   updateMetaText();
   updateStats();

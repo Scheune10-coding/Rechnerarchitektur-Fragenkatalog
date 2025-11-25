@@ -132,11 +132,24 @@ function handleNext() {
   }, 250);
 }
 
+function handleRandom() {
+  const filtered = getFilteredQuestions(allQuestions, appState.selectedCategoryId, appState.selectedTopicId, appState.searchTerm);
+  if (filtered.length === 0) return;
+  const next = Math.floor(Math.random() * filtered.length);
+  animateCardTransition(card, Math.random() > 0.5 ? 'left' : 'right');
+  setTimeout(() => {
+    appState.currentIndex = next;
+    appState.showAnswer = false;
+    render();
+  }, 250);
+}
+
 // Initialisierung
 initCategorySelect(catalog, categorySelect);
 updateTopicSelect(catalog, appState.selectedCategoryId, topicSelect);
 prevBtn.addEventListener("click", handlePrev);
 nextBtn.addEventListener("click", handleNext);
+randomBtn.addEventListener("click", handleRandom);
 setupCardEvents({ card, prevBtn, nextBtn });
 setupKeyboardEvents({ searchInput, getFilteredQuestions, allQuestions, selectedCategoryId: appState.selectedCategoryId, selectedTopicId: appState.selectedTopicId, render, clampIndex });
 setupUIEvents({ modeCardsBtn, modeListBtn, searchInput, categorySelect, topicSelect, startExamBtn, appState, updateTopicSelect, catalog, render });

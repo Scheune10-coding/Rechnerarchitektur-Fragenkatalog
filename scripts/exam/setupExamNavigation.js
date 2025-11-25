@@ -25,7 +25,15 @@ export function setupExamNavigation({ catalog, allQuestions }) {
     return result;
   }
 
-  const examCards = filterForExam().map(q => ({ ...q, mastered: false }));
+  // Karten für die Prüfung zufällig mischen
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  }
+  const examCards = shuffle(filterForExam().map(q => ({ ...q, mastered: false })));
   let queue = examCards.slice();
   let current = queue[0] || null;
   let totalAnswered = 0;

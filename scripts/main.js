@@ -4,6 +4,10 @@ import { getFilteredQuestions } from './filter/getFilteredQuestions.js';
 import { clampIndex } from './filter/clampIndex.js';
 import { renderCardView } from './render/renderCardView.js';
 import { renderListView } from './render/renderListView.js';
+import { setupCardEvents, animateCardTransition } from './events/cardEvents.js';
+import { setupKeyboardEvents } from './events/keyboardEvents.js';
+import { setupUIEvents } from './events/uiEvents.js';
+import { appState } from './state/appState.js';
 
 // erwartet: window.CATALOG = { categories: [...] }
 const catalog = (window.CATALOG && window.CATALOG.categories) ? window.CATALOG : { categories: [] };
@@ -50,28 +54,51 @@ const statsTotal = document.getElementById("statsTotal");
 const statsFiltered = document.getElementById("statsFiltered");
 const startExamBtn = document.getElementById("startExamBtn");
 
-// State
-let mode = "cards";
-let currentIndex = 0;
-let showAnswer = false;
-let searchTerm = "";
-let selectedCategoryId = "all";
-let selectedTopicId = "all";
-
-function render() {
-  const filtered = getFilteredQuestions(allQuestions, selectedCategoryId, selectedTopicId, searchTerm);
+function render(action) {
+  const filtered = getFilteredQuestions(allQuestions, appState.selectedCategoryId, appState.selectedTopicId, appState.searchTerm);
   const domRefs = {
     totalCountLabel, filteredCountLabel, statsTotal, statsFiltered, currentIndexLabel, cardLabel, cardMeta, cardQuestion, cardAnswer,
     listCountLabel, listContainer
   };
-  if (mode === "cards") {
+  if (action === 'toggleAnswer') {
+    appState.showAnswer = !appState.showAnswer;
+    cardAnswer.style.opacity = appState.showAnswer ? 1 : 0;
+    cardLabel.textContent = appState.showAnswer ? "Antwort" : "Frage";
+    return;
+  }
+  if (action === 'next') {
+    animateCardTransition(card, 'left');
+    if (filtered.length === 0) return;
+    appState.currentIndex = clampIndex(appState.currentIndex + 1, filtered.length);
+    appState.showAnswer = false;
+  }
+  if (action === 'prev') {
+    animateCardTransition(card, 'right');
+    if (filtered.length === 0) return;
+    appState.currentIndex = clampIndex(appState.currentIndex - 1, filtered.length);
+    appState.showAnswer = false;
+  }
+  if (action === 'startExam') {
+    if (filtered.length === 0) {
+      alert("Keine Fragen im aktuellen Filter. Bitte Kategorie/Thema/Suche anpassen.");
+      return;
+    }
+    const params = new URLSearchParams();
+    if (appState.selectedCategoryId !== "all") params.set("category", appState.selectedCategoryId);
+    if (appState.selectedTopicId !== "all") params.set("topic", appState.selectedTopicId);
+    if (appState.searchTerm.trim() !== "") params.set("search", appState.searchTerm.trim());
+    const url = "exam.html" + (params.toString() ? "?" + params.toString() : "");
+    window.location.href = url;
+    return;
+  }
+  if (appState.mode === "cards") {
     cardsView.classList.remove("hidden");
     listView.classList.add("hidden");
     modeCardsBtn.classList.add("bg-slate-900", "text-slate-100");
     modeCardsBtn.classList.remove("text-slate-400");
     modeListBtn.classList.remove("bg-slate-900", "text-slate-100");
     modeListBtn.classList.add("text-slate-400");
-    renderCardView(filtered, allQuestions, currentIndex, showAnswer, domRefs);
+    renderCardView(filtered, allQuestions, appState.currentIndex, appState.showAnswer, domRefs);
   } else {
     listView.classList.remove("hidden");
     cardsView.classList.add("hidden");
@@ -83,103 +110,20 @@ function render() {
   }
 }
 
-// Events
-modeCardsBtn.addEventListener("click", () => {
-  mode = "cards";
-  render();
-});
-modeListBtn.addEventListener("click", () => {
-  mode = "list";
-  render();
-});
-searchInput.addEventListener("input", (e) => {
-  searchTerm = e.target.value || "";
-  currentIndex = 0;
-  showAnswer = false;
-  render();
-});
-categorySelect.addEventListener("change", (e) => {
-  selectedCategoryId = e.target.value || "all";
-  selectedTopicId = "all";
-  updateTopicSelect(catalog, selectedCategoryId, topicSelect);
-  currentIndex = 0;
-  showAnswer = false;
-  render();
-});
-topicSelect.addEventListener("change", (e) => {
-  selectedTopicId = e.target.value || "all";
-  currentIndex = 0;
-  showAnswer = false;
-  render();
-});
-card.addEventListener("click", () => {
-  if (mode !== "cards") return;
-  showAnswer = !showAnswer;
-  cardAnswer.style.opacity = showAnswer ? 1 : 0;
-  cardLabel.textContent = showAnswer ? "Antwort" : "Frage";
-});
-prevBtn.addEventListener("click", () => {
-  const filtered = getFilteredQuestions(allQuestions, selectedCategoryId, selectedTopicId, searchTerm);
-  if (filtered.length === 0) return;
-  currentIndex = clampIndex(currentIndex - 1, filtered.length);
-  showAnswer = false;
-  render();
-});
-nextBtn.addEventListener("click", () => {
-  const filtered = getFilteredQuestions(allQuestions, selectedCategoryId, selectedTopicId, searchTerm);
-  if (filtered.length === 0) return;
-  currentIndex = clampIndex(currentIndex + 1, filtered.length);
-  showAnswer = false;
-  render();
-});
-randomBtn.addEventListener("click", () => {
-  const filtered = getFilteredQuestions(allQuestions, selectedCategoryId, selectedTopicId, searchTerm);
-  if (filtered.length === 0) return;
-  const next = Math.floor(Math.random() * filtered.length);
-  currentIndex = next;
-  showAnswer = false;
-  render();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.target === searchInput) return;
-  const filtered = getFilteredQuestions(allQuestions, selectedCategoryId, selectedTopicId, searchTerm);
-  if (filtered.length === 0) return;
-  if (e.code === "Space") {
-    e.preventDefault();
-    if (mode === "cards") {
-      showAnswer = !showAnswer;
-      cardAnswer.style.opacity = showAnswer ? 1 : 0;
-      cardLabel.textContent = showAnswer ? "Antwort" : "Frage";
-    }
-  }
-  if (e.key === "ArrowRight") {
-    e.preventDefault();
-    currentIndex = clampIndex(currentIndex + 1, filtered.length);
-    showAnswer = false;
-    render();
-  }
-  if (e.key === "ArrowLeft") {
-    e.preventDefault();
-    currentIndex = clampIndex(currentIndex - 1, filtered.length);
-    showAnswer = false;
-    render();
-  }
-});
-startExamBtn.addEventListener("click", () => {
-  const filtered = getFilteredQuestions(allQuestions, selectedCategoryId, selectedTopicId, searchTerm);
-  if (filtered.length === 0) {
-    alert("Keine Fragen im aktuellen Filter. Bitte Kategorie/Thema/Suche anpassen.");
-    return;
-  }
-  const params = new URLSearchParams();
-  if (selectedCategoryId !== "all") params.set("category", selectedCategoryId);
-  if (selectedTopicId !== "all") params.set("topic", selectedTopicId);
-  if (searchTerm.trim() !== "") params.set("search", searchTerm.trim());
-  const url = "exam.html" + (params.toString() ? "?" + params.toString() : "");
-  window.location.href = url;
-});
-
-// Init
+// Initialisierung
 initCategorySelect(catalog, categorySelect);
-updateTopicSelect(catalog, selectedCategoryId, topicSelect);
+updateTopicSelect(catalog, appState.selectedCategoryId, topicSelect);
+setupCardEvents({ card, prevBtn, nextBtn });
+setupKeyboardEvents({ searchInput, getFilteredQuestions, allQuestions, selectedCategoryId: appState.selectedCategoryId, selectedTopicId: appState.selectedTopicId, render, clampIndex });
+setupUIEvents({ modeCardsBtn, modeListBtn, searchInput, categorySelect, topicSelect, startExamBtn, appState, updateTopicSelect, catalog, render });
+let touchMoved = false;
+card.addEventListener('touchstart', () => { touchMoved = false; });
+card.addEventListener('touchmove', () => { touchMoved = true; });
+card.addEventListener("click", (e) => {
+  if (touchMoved) return;
+  if (e.target.closest("#prevBtn") || e.target.closest("#nextBtn") || e.target.closest("#randomBtn")) return;
+  appState.showAnswer = !appState.showAnswer;
+  cardAnswer.style.opacity = appState.showAnswer ? 1 : 0;
+  cardLabel.textContent = appState.showAnswer ? "Antwort" : "Frage";
+});
 render();

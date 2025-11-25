@@ -3,17 +3,19 @@
 Dieses Projekt ist ein interaktiver Fragenkatalog für das Fach Rechnernetze, optimiert für die Klausurvorbereitung. Die Anwendung bietet Karteikarten- und Listenansicht, Filtermöglichkeiten nach Kategorie und Thema sowie eine Prüfungssimulation.
 
 ## Features
-- **Karteikarten-Modus**: Fragen einzeln durchgehen, Antwort per Klick oder Tastendruck anzeigen.
+- **Karteikarten-Modus**: Fragen einzeln durchgehen, Antwort per Klick oder Wischgeste (Swipe) auf mobilen Geräten anzeigen.
 - **Listen-Modus**: Alle gefilterten Fragen als Liste mit ausklappbaren Antworten.
 - **Filter**: Nach Kategorie, Thema und Suchbegriff filtern.
 - **Prüfungssimulation**: Starte eine Simulation mit den aktuell gefilterten Fragen. Falsche Antworten kommen erneut in die Queue.
 - **Statistiken**: Zeigt Gesamtanzahl und gefilterte Anzahl der Fragen.
-- **Tastatur-Shortcuts**: Navigation und Antwortanzeige per Tastatur.
+- **Tastatur-Shortcuts**: Navigation und Antwortanzeige per Tastatur (Desktop).
+- **Wischgesten**: Auf mobilen Geräten kann per Swipe zwischen Karten gewechselt und in der Prüfung bewertet werden.
+- **Animationen**: Kartenwechsel ist animiert für ein modernes Nutzererlebnis.
 
 ## Installation & Nutzung
 1. Repository klonen oder Dateien herunterladen.
 2. Stelle sicher, dass die Datei `questions.js` im Projektverzeichnis liegt und die Fragenstruktur enthält.
-3. Öffne `index.html` im Browser.
+3. Öffne `index.html` im Browser (Desktop oder Mobile).
 
 **ODER**
 
@@ -44,10 +46,13 @@ Rechnerarchitektur-Fragenkatalog/
     ├── render/                 # Renderfunktionen für UI
     │   ├── renderCardView.js        # Kartenansicht rendern
     │   └── renderListView.js        # Listenansicht rendern
+    ├── events/                 # Interaktionslogik (Touch, Keyboard, UI)
+    │   ├── cardEvents.js             # Wischgesten & Animationen für Karten
+    │   ├── keyboardEvents.js         # Tastatursteuerung
+    │   └── uiEvents.js               # UI-Events (Filter, Moduswechsel)
     └── exam/                   # Logik für Prüfungssimulation
         └── setupExamNavigation.js   # Navigation & Logik für Prüfung
 ```
-
 
 ## Struktur der `questions.js`
 Die Datei `questions.js` definiert den Fragenkatalog als JavaScript-Objekt und bindet ihn über `window.CATALOG` ein. Die Struktur sieht folgendermaßen aus:
@@ -87,7 +92,7 @@ Die Anwendung liest diese Struktur aus und stellt die Fragen entsprechend dar.
 
 ## Anpassung
 - Fragen, Kategorien und Themen können in `questions.js` angepasst werden.
-- Das Design basiert auf [Tailwind CSS](https://tailwindcss.com/) und ist für moderne Browser optimiert.
+- Das Design basiert auf [Tailwind CSS](https://tailwindcss.com/) und ist für moderne Browser und mobile Geräte optimiert.
 
 ## Lizenz
 Dieses Projekt ist für den privaten Gebrauch und die Klausurvorbereitung gedacht. Bei Weiterverwendung bitte Quellen angeben.

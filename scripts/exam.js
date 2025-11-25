@@ -3,25 +3,31 @@
 
 import { setupExamNavigation } from './exam/setupExamNavigation.js';
 
-// erwartet: window.CATALOG = { categories: [...] }
-const catalog = (window.CATALOG && window.CATALOG.categories) ? window.CATALOG : { categories: [] };
+function waitForCatalog(callback) {
+  if (window.CATALOG && window.CATALOG.categories) {
+    callback(window.CATALOG);
+  } else {
+    setTimeout(() => waitForCatalog(callback), 30);
+  }
+}
 
-const allQuestions = [];
-catalog.categories.forEach(cat => {
-  (cat.topics || []).forEach(topic => {
-    (topic.questions || []).forEach(q => {
-      allQuestions.push({
-        id: q.id,
-        question: q.question,
-        answer: q.answer,
-        categoryId: cat.id,
-        categoryTitle: cat.title,
-        topicId: topic.id,
-        topicTitle: topic.title
+waitForCatalog((catalogObj) => {
+  const catalog = catalogObj;
+  const allQuestions = [];
+  catalog.categories.forEach(cat => {
+    (cat.topics || []).forEach(topic => {
+      (topic.questions || []).forEach(q => {
+        allQuestions.push({
+          id: q.id,
+          question: q.question,
+          answer: q.answer,
+          categoryId: cat.id,
+          categoryTitle: cat.title,
+          topicId: topic.id,
+          topicTitle: topic.title
+        });
       });
     });
   });
+  setupExamNavigation({ catalog, allQuestions });
 });
-
-// Übergibt alle relevanten DOM-Elemente und State-Variablen an die Navigationslogik
-setupExamNavigation({ catalog, allQuestions });

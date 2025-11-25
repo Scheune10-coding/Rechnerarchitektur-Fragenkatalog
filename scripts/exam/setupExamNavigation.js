@@ -1,3 +1,5 @@
+import { setupCardEvents, animateCardTransition } from '../events/cardEvents.js';
+
 // Initialisiert die Prüfungssimulation und Navigation
 export function setupExamNavigation({ catalog, allQuestions }) {
   // URL-Parameter lesen
@@ -144,12 +146,16 @@ export function setupExamNavigation({ catalog, allQuestions }) {
   }
 
   // Buttons
+  let touchMoved = false;
+  card.addEventListener('touchstart', () => { touchMoved = false; });
+  card.addEventListener('touchmove', () => { touchMoved = true; });
   toggleAnswerBtn.addEventListener("click", (e) => {
     e.stopPropagation(); // verhindert Doppeltrigger über Karten-Click
     toggleAnswer();
   });
   card.addEventListener("click", (e) => {
-    if (toggleAnswerBtn.contains(e.target)) return;
+    if (touchMoved) return;
+    if (e.target.closest("#correctBtn") || e.target.closest("#wrongBtn") || e.target.closest("#toggleAnswerBtn")) return;
     toggleAnswer();
   });
   correctBtn.addEventListener("click", () => {
@@ -158,7 +164,8 @@ export function setupExamNavigation({ catalog, allQuestions }) {
     totalCorrect++;
     current.mastered = true;
     queue.shift();
-    nextFromQueue();
+    animateCardTransition(card, 'left');
+    setTimeout(nextFromQueue, 250);
   });
   wrongBtn.addEventListener("click", () => {
     if (!current) return;
@@ -166,7 +173,8 @@ export function setupExamNavigation({ catalog, allQuestions }) {
     totalWrong++;
     queue.push(current);
     queue.shift();
-    nextFromQueue();
+    animateCardTransition(card, 'right');
+    setTimeout(nextFromQueue, 250);
   });
   document.addEventListener("keydown", (e) => {
     if (e.code === "Space") {
@@ -190,6 +198,16 @@ export function setupExamNavigation({ catalog, allQuestions }) {
       wrongBtn.click();
     }
   });
+
+  // Animation und Wischgesten für Karte
+  setupCardEvents({ card, prevBtn: wrongBtn, nextBtn: correctBtn });
+
+  function animateAndRender(direction, after) {
+    animateCardTransition(card, direction);
+    setTimeout(() => {
+      if (typeof after === 'function') after();
+    }, 250);
+  }
 
   // Init
   updateMetaText();

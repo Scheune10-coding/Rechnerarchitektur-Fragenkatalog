@@ -95,6 +95,24 @@
             </div>
           </div>
 
+          <!-- Fragenquelle-Auswahl (Dropdown) -->
+          <div class="mb-4 flex flex-col sm:flex-row gap-2 items-center justify-center">
+            <label for="questionsSourceSelect" class="text-xs font-medium text-slate-200">Fragenquelle:</label>
+            <select id="questionsSourceSelect" class="rounded-xl border border-slate-700 bg-slate-900/90 py-2 px-3 text-xs text-slate-50 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500">
+              <option value="questions.js">Standard-Katalog</option>
+              <option value="questionsExtended.js">Erweiterter Katalog</option>
+            </select>
+          </div>
+          <script type="module">
+            import { getQuestionsFileFromUrl } from './scripts/dataSource.js';
+            const select = document.getElementById('questionsSourceSelect');
+            const file = getQuestionsFileFromUrl();
+            if (select) select.value = file;
+            select.addEventListener('change', function() {
+              window.location.href = window.location.pathname + '?questionsFile=' + encodeURIComponent(select.value);
+            });
+          </script>
+
           <!-- Card -->
           <div
             id="flashcard"

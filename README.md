@@ -6,15 +6,16 @@ Dieses Projekt ist ein interaktiver Fragenkatalog für das Fach Rechnernetze, op
 - **Karteikarten-Modus**: Fragen einzeln durchgehen, Antwort per Klick oder Wischgeste (Swipe) auf mobilen Geräten anzeigen.
 - **Listen-Modus**: Alle gefilterten Fragen als Liste mit ausklappbaren Antworten.
 - **Filter**: Nach Kategorie, Thema und Suchbegriff filtern.
-- **Prüfungssimulation**: Starte eine Simulation mit den aktuell gefilterten Fragen. Falsche Antworten kommen erneut in die Queue.
+- **Prüfungssimulation**: Starte eine Simulation mit den aktuell gefilterten Fragen. Falsche Antworten kommen erneut in die Queue. Die Reihenfolge der Prüfungsfragen ist immer zufällig.
 - **Statistiken**: Zeigt Gesamtanzahl und gefilterte Anzahl der Fragen.
 - **Tastatur-Shortcuts**: Navigation und Antwortanzeige per Tastatur (Desktop).
 - **Wischgesten**: Auf mobilen Geräten kann per Swipe zwischen Karten gewechselt und in der Prüfung bewertet werden.
 - **Animationen**: Kartenwechsel ist animiert für ein modernes Nutzererlebnis.
+- **Datenquellen-Auswahl**: Du kannst zwischen verschiedenen Fragenkatalogen (questions.js, questionsExtended.js) wählen.
 
 ## Installation & Nutzung
 1. Repository klonen oder Dateien herunterladen.
-2. Stelle sicher, dass die Datei `questions.js` im Projektverzeichnis liegt und die Fragenstruktur enthält.
+2. Stelle sicher, dass die Datei `questions.js` und optional `questionsExtended.js` im Projektverzeichnis liegen und die Fragenstruktur enthalten.
 3. Öffne `index.html` im Browser (Desktop oder Mobile).
 
 **ODER**
@@ -23,20 +24,29 @@ Dieses Projekt ist ein interaktiver Fragenkatalog für das Fach Rechnernetze, op
 
 ## Dateien
 - `index.html`: Hauptanwendung mit Karteikarten, Listenansicht und Filter.
-- `questions.js`: Enthält den Fragenkatalog als JavaScript-Objekt.
+- `questions.js`: Standard-Fragenkatalog als JavaScript-Objekt.
+- `questionsExtended.js`: Erweiterter Fragenkatalog mit zusätzlichen/vertieften Fragen.
 - `exam.html`: Prüfungssimulation (separat aufrufbar).
+- `README.md`: Projektbeschreibung.
+- `questionsExtended.js`: Enthält einen größeren/vertieften Fragenpool. Wähle im Menü die gewünschte Datenquelle aus.
+
+## Unterschied zwischen `questions.js` und `questionsExtended.js`
+- **questions.js**: Enthält den Basis-Fragenkatalog für die Standard-Klausurvorbereitung.
+- **questionsExtended.js**: Enthält zusätzliche, vertiefende oder schwierigere Fragen. Ideal für intensive Vorbereitung oder Wiederholung.
+- Die Anwendung kann im Menü zwischen beiden Quellen umschalten. Die gewählte Quelle wird überall verwendet (Karten, Liste, Prüfung).
 
 ## Projektstruktur
-
 ```
 Rechnerarchitektur-Fragenkatalog/
 ├── index.html                # Hauptanwendung (Karteikarten & Liste)
 ├── exam.html                 # Prüfungssimulation
-├── questions.js              # Fragenkatalog (Daten)
+├── questions.js              # Standard-Fragenkatalog (Daten)
+├── questionsExtended.js      # Erweiterter Fragenkatalog (Daten)
 ├── README.md                 # Projektbeschreibung
 └── scripts/                  # JavaScript-Logik, modular aufgebaut
     ├── main.js               # Einstiegspunkt für index.html
     ├── exam.js               # Einstiegspunkt für exam.html
+    ├── dataSource.js         # Logik für Datenquellen-Auswahl und Laden
     ├── dom/                  # DOM-Initialisierung und Auswahl
     │   ├── initCategorySelect.js    # Kategorie-Auswahl initialisieren
     │   └── updateTopicSelect.js     # Themen-Auswahl aktualisieren
@@ -54,8 +64,8 @@ Rechnerarchitektur-Fragenkatalog/
         └── setupExamNavigation.js   # Navigation & Logik für Prüfung
 ```
 
-## Struktur der `questions.js`
-Die Datei `questions.js` definiert den Fragenkatalog als JavaScript-Objekt und bindet ihn über `window.CATALOG` ein. Die Struktur sieht folgendermaßen aus:
+## Struktur der `questions.js` und `questionsExtended.js`
+Beide Dateien definieren den Fragenkatalog als JavaScript-Objekt und binden ihn über `window.CATALOG` ein. Die Struktur sieht folgendermaßen aus:
 
 ```js
 window.CATALOG = {
@@ -91,7 +101,7 @@ window.CATALOG = {
 Die Anwendung liest diese Struktur aus und stellt die Fragen entsprechend dar.
 
 ## Anpassung
-- Fragen, Kategorien und Themen können in `questions.js` angepasst werden.
+- Fragen, Kategorien und Themen können in `questions.js` und `questionsExtended.js` angepasst werden.
 - Das Design basiert auf [Tailwind CSS](https://tailwindcss.com/) und ist für moderne Browser und mobile Geräte optimiert.
 
 ## Lizenz
